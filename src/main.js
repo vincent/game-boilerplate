@@ -1,25 +1,74 @@
 'use strict';
 
-var renderer = require('./screen');
-var moon     = require('./moon');
+var debugging = require('debug'),
+            d = location.search.match(/debug=([^;]*)/);
+debugging.enable(d && d.length === 2 ? d[1] : false);
 
-// You need to create a root container that will hold the scene you want to draw.
-var stage = new PIXI.Container();
+var EventEmitter = require('events').EventEmitter;
+var util         = require('util');
+var debug        = debugging('main');
 
-// Add the bunny to the scene we are building.
-stage.addChild(moon);
+function Main () {
 
-// kick off the animation loop (defined below)
-animate();
+  EventEmitter.call(this);
 
-function animate() {
+  var self = this;
 
-  // start the timer for the next animation loop
-  requestAnimationFrame(animate);
+  // You need to create a root container that will hold the scene you want to draw.
+  self.stage = new PIXI.Container();
 
-  // each frame we spin the moon around a bit
-  moon.rotation += 0.01;
+  self.renderer = require('./renderer');
 
-  // this is the main render call that makes pixi draw your container and its children.
-  renderer.render(stage);
+  // kick off the animation loop (defined below)
+  animate();
+
+  function animate() {
+
+    // start the timer for the next animation loop
+    requestAnimationFrame(animate);
+
+    // emit an event, which components will listen to
+    self.emit('update', 0.1);
+
+    // this is the main render call that makes pixi draw your container and its children.
+    self.renderer.render(self.stage);
+  }
 }
+
+util.inherits(Main, EventEmitter);
+
+Main.prototype.mount = function (object) {
+
+  var main = this;
+
+  // Get bounds
+
+  var onUpdate = object.update.bind(object);
+  var onClick  = object.click.bind(object);
+
+  // Setup listeners
+
+  object.on('added', function () {
+    debug('%o is on stage', object);
+
+    onClick  && main.on('mousedown',  onClick);
+    onClick  && main.on('touchstart', onClick);
+    onUpdate && main.on('update',     onUpdate);
+  });
+
+  object.on('removed', function () {
+    debug('%o was removed from stage', object);
+
+    onClick  && main.off('mousedown',  onClick);
+    onClick  && main.off('touchstart', onClick);
+    onUpdate && main.off('update',     onUpdate);
+  });
+
+  main.stage.addChild(object);
+};
+
+//////////////////////////////////////
+
+var main = module.exports = new Main();
+
+require('./components/moon')(main);

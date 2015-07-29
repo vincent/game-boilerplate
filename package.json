@@ -1,7 +1,6 @@
 {
   "name": "pixi-test",
-  "browserify": {
-  },
+  "browserify": {},
   "scripts": {
     "build": "NODE_ENV=production browserify src/main.js | uglifyjs -cm > public/js/bundle.js",
     "start": "ecstatic -p 8000 public",
@@ -9,6 +8,7 @@
   },
   "dependencies": {
     "browserify": "^10.2.6",
+    "debug": "^2.2.0",
     "ecstatic": "~0.8.0",
     "uglify": "~0.1.5",
     "watchify": "^3.2.3"
