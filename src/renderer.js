@@ -1,6 +1,5 @@
 'use strict';
 
-
 function getDimensions () {
     return {
         width: window.innerWidth  ||

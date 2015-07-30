@@ -19,18 +19,18 @@ function Main () {
 
   self.renderer = require('./renderer');
 
-  // kick off the animation loop (defined below)
+  // Kick off the animation loop (defined below)
   animate();
 
-  function animate() {
+  function animate () {
 
-    // start the timer for the next animation loop
+    // Start the timer for the next animation loop
     requestAnimationFrame(animate);
 
-    // emit an event, which components will listen to
+    // Emit an event, which components will listen to
     self.emit('update', 0.1);
 
-    // this is the main render call that makes pixi draw your container and its children.
+    // This is the main render call that makes pixi draw your container and its children.
     self.renderer.render(self.stage);
   }
 }
@@ -42,12 +42,10 @@ Main.prototype.mount = function (object) {
   var main = this;
 
   // Get bounds
-
   var onUpdate = object.update.bind(object);
   var onClick  = object.click.bind(object);
 
   // Setup listeners
-
   object.on('added', function () {
     debug('%o is on stage', object);
 
@@ -64,6 +62,7 @@ Main.prototype.mount = function (object) {
     onUpdate && main.off('update',     onUpdate);
   });
 
+  // Add component on stage
   main.stage.addChild(object);
 };
 
@@ -71,4 +70,10 @@ Main.prototype.mount = function (object) {
 
 var main = module.exports = new Main();
 
+// Should be the first component
+var dispatcher = require('./components/dispatcher');
+
+dispatcher.initialize(main);
+
+// Other components
 require('./components/moon')(main);

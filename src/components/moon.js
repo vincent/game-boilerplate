@@ -2,6 +2,8 @@
 
 var debug = require('debug')(__filename);
 
+var dispatcher = require('./dispatcher');
+
 module.exports = function (main) {
   return new Moon(main);
 };
@@ -41,4 +43,6 @@ Moon.prototype.update = function (delta) {
 Moon.prototype.click = function () {
   debug('%o was clicked', this);
   this.state.direction = this.state.direction > 0 ? -1 : 1;
+
+  dispatcher.incrementScore(1);
 };
