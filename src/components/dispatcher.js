@@ -5,14 +5,6 @@ var util         = require('util');
 var debug        = require('debug')(__filename);
 var EventEmitter = require('events').EventEmitter;
 
-var state, dispatcher = new Dispatcher();
-
-dispatcher.on('change', function (changes, newState) {
-  debug('state changed %o', changes);
-});
-
-module.exports = dispatcher;
-
 ///////////////////////////////////
 
 function Dispatcher () {
@@ -30,8 +22,16 @@ Dispatcher.prototype.setState = function (props) {
 };
 
 Dispatcher.prototype.changed = function () {
-  this.emit('change');
+  this.emit('change', state);
 };
+
+var state, dispatcher = new Dispatcher();
+
+dispatcher.on('change', function (state) {
+  debug('state changed %o', state);
+});
+
+module.exports = dispatcher;
 
 /**************************
  *
@@ -41,21 +41,13 @@ Dispatcher.prototype.changed = function () {
  *
  **/
 
-Dispatcher.prototype.initialize = function (main) {
+state = {
 
-  this.main = main;
+  name: 'Guest' || window.prompt('Your name'),
 
-  // Initial state
+  timePlayed: 0,
 
-  state = {
-
-    name: 'Guest' || window.prompt('Your name'),
-
-    timePlayed: 0,
-
-    score: 0,
-
-  };
+  score: 0,
 
 };
 

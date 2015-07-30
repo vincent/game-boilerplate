@@ -70,10 +70,5 @@ Main.prototype.mount = function (object) {
 
 var main = module.exports = new Main();
 
-// Should be the first component
-var dispatcher = require('./components/dispatcher');
-
-dispatcher.initialize(main);
-
 // Other components
 require('./components/moon')(main);
