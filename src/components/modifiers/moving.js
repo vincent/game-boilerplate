@@ -19,8 +19,8 @@ module.exports = function (component) {
 
   component.on('update', function () {
     var dt = PIXI.ticker.shared.deltaTime;
-    component.position.y += component.velocity.y * dt + acceleration * 0.5 * dt * dt;
-    component.velocity.y += acceleration * dt;
+    component.position.y += component.velocity.y * dt * dt; // + acceleration * 0.5 * dt * dt;
+    // component.velocity.y += acceleration * dt;
   });
 
 };

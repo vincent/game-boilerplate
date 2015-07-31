@@ -14,10 +14,12 @@ function Main () {
 
   var self = this;
 
+  self.renderer = require('./renderer');
+
   // You need to create a root container that will hold the scene you want to draw.
   self.stage = new PIXI.Container();
-
-  self.renderer = require('./renderer');
+  self.stage.width  = self.renderer.width;
+  self.stage.height = self.renderer.height;
 
   // Kick off the animation loop (defined below)
   animate();
@@ -40,6 +42,12 @@ util.inherits(Main, EventEmitter);
 Main.prototype.mount = function (object) {
 
   var main = this;
+
+  // Set world
+  object.world = {
+    height: main.renderer.height,
+    width: main.renderer.width
+  };
 
   // Get bounds
   var onUpdate = object.update.bind(object);

@@ -35,9 +35,9 @@ function Moon (main) {
   main.mount(this);
 
   this.velocity = { x: 0, y: 0 };
-  moving(this);
-  // gravity(this);
+  gravity(this);
   bounce(this);
+  moving(this);
 }
 
 // PIXI inheritance
@@ -55,6 +55,8 @@ Moon.prototype.update = function () {
 Moon.prototype.click = function () {
   debug('%o was clicked', this);
   this.state.direction = this.state.direction > 0 ? -1 : 1;
+
+  this.velocity.y = -20;
 
   dispatcher.incrementScore(1);
 };
