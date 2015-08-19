@@ -12,71 +12,56 @@ function Main () {
 
   EventEmitter.call(this);
 
-  var self = this;
+  this.loop = this.loop.bind(this);
 
-  self.renderer = require('./renderer');
+  this.loader   = require('./loader');
+  this.renderer = require('./renderer');
 
   // You need to create a root container that will hold the scene you want to draw.
-  self.stage = new PIXI.Container();
-  self.stage.width  = self.renderer.width;
-  self.stage.height = self.renderer.height;
-
-  // Kick off the animation loop (defined below)
-  animate();
-
-  function animate () {
-
-    // Start the timer for the next animation loop
-    requestAnimationFrame(animate);
-
-    // Emit an event, which components will listen to
-    self.emit('update', 0.1);
-
-    // This is the main render call that makes pixi draw your container and its children.
-    self.renderer.render(self.stage);
-  }
+  this.stage = new PIXI.Container();
+  this.stage.width  = this.renderer.width;
+  this.stage.height = this.renderer.height;
 }
 
 util.inherits(Main, EventEmitter);
 
-Main.prototype.mount = function (object) {
+Main.prototype.scene = function (scene) {
 
-  var main = this;
+  debug('switch to scene %o', scene);
 
-  // Set world
-  object.world = {
-    height: main.renderer.height,
-    width: main.renderer.width
-  };
+  if (this.currentScene) {
+    this.stage.removeChild(this.currentScene);
+  }
 
-  // Get bounds
-  var onUpdate = object.update.bind(object);
-  var onClick  = object.click.bind(object);
+  scene.assets().forEach(this.loader.add.bind(this.loader));
 
-  // Setup listeners
-  object.on('added', function () {
-    debug('%o is on stage', object);
+  this.loader.on('loaded', function () {
 
-    onClick  && main.on('mousedown',  onClick);
-    onClick  && main.on('touchstart', onClick);
-    onUpdate && main.on('update',     onUpdate);
+    debug('scene %o is ready', scene);
+
+    this.currentScene = scene;
+    this.stage.addChild(this.currentScene);
   });
 
-  object.on('removed', function () {
-    debug('%o was removed from stage', object);
+  this.loader.start();
+};
 
-    onClick  && main.off('mousedown',  onClick);
-    onClick  && main.off('touchstart', onClick);
-    onUpdate && main.off('update',     onUpdate);
-  });
+Main.prototype.loop = function () {
 
-  // Add component on stage
-  main.stage.addChild(object);
+  // Start the timer for the next animation loop
+  requestAnimationFrame(this.loop);
+
+  // Emit an event, which components will listen to
+  this.emit('update', 0.1);
+
+  // This is the main render call that makes pixi draw your container and its children.
+  this.renderer.render(this.stage);
 };
 
 //////////////////////////////////////
 
 var main = module.exports = new Main();
 
-// Other components
-require('./components/moon')(main);
+var Scene = require('./scenes/test');
+var scene = new Scene(main);
+main.scene(scene);

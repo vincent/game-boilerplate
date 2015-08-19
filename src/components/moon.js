@@ -8,19 +8,17 @@ var moving     = require('./modifiers/moving');
 var gravity    = require('./modifiers/gravity');
 var bounce     = require('./modifiers/bounce');
 
-module.exports = function (main) {
-  return new Moon(main);
-};
+module.exports = Moon;
 
-function Moon (main) {
+var texture;
+
+function Moon () {
 
   this.state = {
     direction: 1
   };
 
-  this.main = main;
-
-  PIXI.Sprite.call(this, PIXI.Texture.fromImage('images/moon.png'));
+  PIXI.Sprite.call(this, texture);
 
   // Setup interactivity
   this.interactive = true;
@@ -30,9 +28,6 @@ function Moon (main) {
   this.position.y = 200;
   this.scale.x = 2;
   this.scale.y = 2;
-
-  // Mount me to stage, setup listeners
-  main.mount(this);
 
   this.velocity = { x: 0, y: 0 };
   gravity(this);
@@ -44,6 +39,14 @@ function Moon (main) {
 
 Moon.constructor = Moon;
 Moon.prototype = Object.create(PIXI.Sprite.prototype);
+
+// Assets
+
+Moon.prototype.assets = function (loader) {
+  return {
+    textures: ['images/moon.png']
+  };
+};
 
 // Instance methods
 
