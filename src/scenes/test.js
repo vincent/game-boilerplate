@@ -13,11 +13,8 @@ function TestScene (main) {
     Base.call(this, main);
 
     // Components
-    var moon = new Moon();
-    this.mount(moon);
+    var moon = this.add(new Moon());
 }
-
-// PIXI inheritance
 
 util.inherits(TestScene, Base);
 

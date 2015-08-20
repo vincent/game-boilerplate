@@ -14,7 +14,6 @@ function Main () {
 
   this.loop = this.loop.bind(this);
 
-  this.loader   = require('./loader');
   this.renderer = require('./renderer');
 
   // You need to create a root container that will hold the scene you want to draw.
@@ -27,23 +26,27 @@ util.inherits(Main, EventEmitter);
 
 Main.prototype.scene = function (scene) {
 
+  var self = this;
+
   debug('switch to scene %o', scene);
 
-  if (this.currentScene) {
-    this.stage.removeChild(this.currentScene);
-  }
+  scene.assets().forEach(PIXI.loader.add.bind(PIXI.loader));
 
-  scene.assets().forEach(this.loader.add.bind(this.loader));
+  PIXI.loader.load(function () {
 
-  this.loader.on('loaded', function () {
+    scene.mountAll();
 
     debug('scene %o is ready', scene);
 
-    this.currentScene = scene;
-    this.stage.addChild(this.currentScene);
+    if (self.currentScene) {
+      self.stage.removeChild(self.currentScene);
+    }
+
+    self.currentScene = scene;
+    self.stage.addChild(self.currentScene);
   });
 
-  this.loader.start();
+  return this;
 };
 
 Main.prototype.loop = function () {
@@ -52,7 +55,7 @@ Main.prototype.loop = function () {
   requestAnimationFrame(this.loop);
 
   // Emit an event, which components will listen to
-  this.emit('update', 0.1);
+  this.emit('update', PIXI.ticker.shared.elapsedMS);
 
   // This is the main render call that makes pixi draw your container and its children.
   this.renderer.render(this.stage);
@@ -64,4 +67,4 @@ var main = module.exports = new Main();
 
 var Scene = require('./scenes/test');
 var scene = new Scene(main);
-main.scene(scene);
+main.scene(scene).loop();

@@ -10,26 +10,32 @@ function BaseScene (main) {
     PIXI.Container.call(this);
 
     this.main = main;
+    this.components = [];
 }
 
 BaseScene.constructor = BaseScene;
 BaseScene.prototype = Object.create(PIXI.Container.prototype);
 
 BaseScene.prototype.assets = function () {
-  return _.compact(_.merge(_.map(this.children, function (child) {
-      return child.assets;
+  return _.compact(_.merge(_.map(this.components, function (child) {
+      return child.assets();
   })));
+};
+
+BaseScene.prototype.add = function(child) {
+  this.components.push(child);
+  return child;
+};
+
+BaseScene.prototype.mountAll = function() {
+  this.components.forEach(this.mount.bind(this));
 };
 
 BaseScene.prototype.mount = function (object) {
 
   var self = this;
 
-  // Set world
-  object.world = {
-    height: self.main.renderer.height,
-    width: self.main.renderer.width
-  };
+  if (object.mount) { object.mount(this); }
 
   // Get bounds
   var onUpdate = object.update.bind(object);
@@ -37,19 +43,19 @@ BaseScene.prototype.mount = function (object) {
 
   // Setup listeners
   object.on('added', function () {
-    debug('%o is on scene', object);
+    debug('%o is on scene %o', object, self);
 
-    onClick  && self.main.on('mousedown',  onClick);
-    onClick  && self.main.on('touchstart', onClick);
-    onUpdate && self.main.on('update',     onUpdate);
+    if (onClick)  { self.main.on('mousedown',  onClick);  }
+    if (onClick)  { self.main.on('touchstart', onClick);  }
+    if (onUpdate) { self.main.on('update',     onUpdate); }
   });
 
   object.on('removed', function () {
     debug('%o was removed from scene', object);
 
-    onClick  && self.main.off('mousedown',  onClick);
-    onClick  && self.main.off('touchstart', onClick);
-    onUpdate && self.main.off('update',     onUpdate);
+    if (onClick)  { self.main.off('mousedown',  onClick);  }
+    if (onClick)  { self.main.off('touchstart', onClick);  }
+    if (onUpdate) { self.main.off('update',     onUpdate); }
   });
 
   // Add component on scene
